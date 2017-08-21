@@ -9,9 +9,9 @@ Linux系统上安装基于KVM的WIN10虚拟机
     * [创建桥接网络](#3)
     * [创建虚拟主机](#4)
         * [准备安装镜像](#4.1)
-        * [准备windows驱动](#4.2)
+        * [准备Windows驱动](#4.2)
         * [建立虚拟主机](#4.3)
-    * [安装windows 10](#5)
+    * [安装Windows 10](#5)
 
 # <p id="1">为什么要安装KVM虚拟机</p>
 
@@ -27,7 +27,7 @@ Linux系统上安装基于KVM的WIN10虚拟机
 
 ## <p id="2">安装KVM</p>
 
-    #首先安装KVM相关包文件，如果没有安装图形桌面则使用**--no-install-recommends**参数，这样不会安装与图形相关的库。
+    #首先安装KVM相关包文件，如果没有安装图形桌面则使用--no-install-recommends参数，这样不会安装与图形相关的库。
     sudo apt-get install -y         \
             --no-install-recommends \
             qemu-kvm                \
@@ -72,5 +72,52 @@ Linux系统上安装基于KVM的WIN10虚拟机
     #查看已有网桥
     sudo brctl show
 
+## <p id="4">创建虚拟主机</p>
+
+### <p id="4.1">准备安装镜像</p>
+
+在开始之前我们做一些准备：
++ Windows10正版安装镜像
++ [Virtio ISO 和软盘镜像](https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.126-2/)
++ VNC客户端
+
+
+### <p id="4.2">准备Windows驱动</p>
+
+### <p id="4.3">建立虚拟主机</p>
+
+使用**virt-install**命令安装虚拟机：
+
+    virt-install \ 
+            --name win10 \
+            --memory 4096 \
+            --vcpus sockets=1,cores=2,threads=2 \
+            --cdrom=/path/to/Windows_10_Multiple_Editions_X64_DVD_6848463.iso \
+            --os-variant=win8.1 \
+            --disk /path/to/win10.img,bus=virtio,size=64 \
+            --disk /path/to/virtio-win-0.1.126_amd64.vfd,device=floppy \
+            --network bridge=br0,model=virtio \
+            --graphics vnc,password=945778430,port=5910 \
+            --hvm \
+            --virt-type kvm
+
+由上面的命令可以看出虚拟机的配置信息如下：
++ 名称：win10
++ 内存：4G
++ 1个CPU，1个核心，两个线程
++ 1个CDROM(windows10安装镜像)
++ 64G硬盘(系统硬盘)
++ 1个软驱(Virtio驱动)
++ VNC远程桌面密码：945778430，端口：5910
+
+如果命令正确应该会有下面信息输出：
+
+    Starting install...
+    Creating domain...
+    Domain installation still in progress. Waiting for installation to complete.
+
+> 但是此时如果没有连接VNC服务则无法看到windows安装的图形界面
+
+### <p id="5">安装Windows 10</p>
 
 
